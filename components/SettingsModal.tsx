@@ -1,4 +1,4 @@
-import React, { useState, useRef } from 'react';
+import React, { useRef } from 'react';
 import { Language } from '../translations';
 
 interface SettingsModalProps {
@@ -14,13 +14,11 @@ interface SettingsModalProps {
   onRemoveDevice: (id: string) => void;
   activePairingCode: string | null;
   onGeneratePairingCode: () => string;
-  onOpenSupport?: () => void;
   onShowToast: (msg: string) => void;
 }
 
 const SettingsModal: React.FC<SettingsModalProps> = ({ 
-  isOpen, onClose, user, onUpdateAvatar, onLogout,
-  onOpenSupport, onShowToast
+  isOpen, onClose, user, onUpdateAvatar, onLogout
 }) => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
@@ -58,23 +56,25 @@ const SettingsModal: React.FC<SettingsModalProps> = ({
             
             <div className="text-center">
               <h3 className="text-xl font-black tracking-tight">{user.email}</h3>
-              <span className="text-[#00D1FF] text-[10px] font-black px-4 py-1.5 rounded-full border border-[#00D1FF]/30 uppercase tracking-[0.2em] mt-3 inline-block">Sessão Ativa e Gratuita</span>
+              <span className="text-[#00D1FF] text-[10px] font-black px-4 py-1.5 rounded-full border border-[#00D1FF]/30 uppercase tracking-[0.2em] mt-3 inline-block">Conta Gratuita</span>
             </div>
           </div>
 
-          <button onClick={onOpenSupport} className="w-full p-6 bg-white/[0.02] border border-white/5 rounded-3xl hover:bg-white/[0.05] transition-all flex items-center justify-between group">
-            <div className="text-left">
-              <p className="font-black text-[9px] text-white/30 group-hover:text-[#00D1FF] transition-colors uppercase tracking-[0.2em] mb-1">Central Alex</p>
-              <p className="font-bold text-sm">Falar com Suporte</p>
-            </div>
-            <span className="text-xl">👨‍💼</span>
-          </button>
+          <div className="space-y-4">
+             <div className="p-6 bg-white/[0.02] border border-white/5 rounded-3xl opacity-50">
+                <p className="text-[9px] font-black uppercase tracking-widest text-gray-500 mb-2">Status da Rede</p>
+                <div className="flex items-center gap-2">
+                  <div className="w-2 h-2 bg-green-500 rounded-full animate-pulse" />
+                  <p className="text-sm font-bold">Servidores Online</p>
+                </div>
+             </div>
+          </div>
 
-          <button onClick={onLogout} className="w-full py-6 text-red-500/40 hover:text-red-500 font-black text-[10px] uppercase tracking-[0.5em] transition-all">Encerrar Sessão</button>
+          <button onClick={onLogout} className="w-full py-6 text-red-500/40 hover:text-red-500 font-black text-[10px] uppercase tracking-[0.5em] transition-all">Sair da MONTFLIX</button>
         </div>
         
         <p className="p-6 text-[8px] text-center text-gray-700 font-bold uppercase tracking-widest border-t border-white/5">
-          Versão 2.6.0 • © 2026 MONTFLIX
+          © 2026 MONTFLIX PRODUCTION
         </p>
       </div>
     </div>

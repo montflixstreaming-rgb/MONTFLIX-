@@ -3,7 +3,6 @@ import Navbar from './components/Navbar';
 import Hero from './components/Hero';
 import MovieRow from './components/MovieRow';
 import SettingsModal from './components/SettingsModal';
-import AISearch from './components/AISearch';
 import AuthScreen from './components/AuthScreen';
 import NotificationToast from './components/NotificationToast';
 import VideoPlayer from './components/VideoPlayer';
@@ -22,7 +21,6 @@ const App: React.FC = () => {
   const [searchQuery, setSearchQuery] = useState('');
   const [language, setLanguage] = useState<Language>('pt');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
-  const [isAIOpen, setIsAIOpen] = useState(false);
   const [toastMessage, setToastMessage] = useState<string | null>(null);
   const [activeMovie, setActiveMovie] = useState<Movie | null>(null);
   const [currentView, setCurrentView] = useState('home');
@@ -116,7 +114,6 @@ const App: React.FC = () => {
         user={user} 
         onUpdateAvatar={(img) => setUser({...user, avatar: img})} 
         onLogout={() => { localStorage.removeItem('montflix_user'); setUser(null); }} 
-        onOpenSupport={() => setIsAIOpen(true)} 
         onShowToast={setToastMessage} 
         currentLang={language} 
         setLanguage={setLanguage} 
@@ -127,7 +124,6 @@ const App: React.FC = () => {
         onGeneratePairingCode={() => ""}
       />
       
-      <AISearch isOpen={isAIOpen} onClose={() => setIsAIOpen(false)} catalog={MOCK_MOVIES} language={language} userEmail={user.email} />
       {activeMovie && <VideoPlayer movie={activeMovie} onClose={() => setActiveMovie(null)} />}
       {toastMessage && <NotificationToast message={toastMessage} onClose={() => setToastMessage(null)} />}
     </div>
