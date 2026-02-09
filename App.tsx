@@ -107,7 +107,7 @@ const App: React.FC = () => {
       </main>
 
       <footer className="py-20 border-t border-white/5 text-center opacity-40 text-[10px] uppercase font-bold tracking-[0.3em]">
-        © 2026 MONTFLIX PRODUCTION • CINEMA GRATUITO PARA TODOS
+        © 2026 MONTFLIX PRODUCTION • CINEMA GRATUITO
       </footer>
 
       <SettingsModal 
