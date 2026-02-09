@@ -1,0 +1,7 @@
+{
+  "name": "MONTFLIX Pro",
+  "description": "Streaming simplificado de alta qualidade",
+  "requestFramePermissions": [
+    "camera"
+  ]
+}
