@@ -11,13 +11,18 @@ import { Movie } from './services/types';
 import { Language } from './translations';
 import { MOCK_MOVIES } from './constants';
 
-interface User {
+interface UserRecord {
+  id: string;
   email: string;
+  name: string;
   avatar: string | null;
+  createdAt: string;
+  lastLogin: string;
 }
 
 const App: React.FC = () => {
-  const [user, setUser] = useState<User | null>(null);
+  const [currentUser, setCurrentUser] = useState<UserRecord | null>(null);
+  const [dbUsers, setDbUsers] = useState<UserRecord[]>([]);
   const [searchQuery, setSearchQuery] = useState('');
   const [language, setLanguage] = useState<Language>('pt');
   const [isSettingsOpen, setIsSettingsOpen] = useState(false);
@@ -26,37 +31,68 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('home');
   const [myList, setMyList] = useState<Movie[]>([]);
 
+  // Carregamento do Banco de Dados Central
   useEffect(() => {
-    const savedUser = localStorage.getItem('montflix_user');
+    const savedSession = localStorage.getItem('montflix_current_session');
     const savedList = localStorage.getItem('montflix_mylist');
-    if (savedUser) {
-      try { setUser(JSON.parse(savedUser)); } catch (e) { localStorage.removeItem('montflix_user'); }
+    const savedDatabase = localStorage.getItem('MONTFLIX_CORE_DATABASE');
+    
+    if (savedSession) {
+      try { setCurrentUser(JSON.parse(savedSession)); } catch (e) { localStorage.removeItem('montflix_current_session'); }
     }
     if (savedList) {
       try { setMyList(JSON.parse(savedList)); } catch (e) { setMyList([]); }
     }
+    if (savedDatabase) {
+      try { setDbUsers(JSON.parse(savedDatabase)); } catch (e) { setDbUsers([]); }
+    }
   }, []);
 
-  useEffect(() => {
-    localStorage.setItem('montflix_mylist', JSON.stringify(myList));
-  }, [myList]);
+  const handleLogin = (authData: { email: string; avatar: string | null }) => {
+    const name = authData.email.split('@')[0].charAt(0).toUpperCase() + authData.email.split('@')[0].slice(1);
+    const now = new Date().toLocaleString('pt-BR');
+    
+    setDbUsers(prev => {
+      const existingUser = prev.find(u => u.email === authData.email);
+      let updatedList: UserRecord[];
 
-  const toggleFavorite = (movie: Movie) => {
-    setMyList(prev => {
-      const exists = prev.find(m => m.id === movie.id);
-      if (exists) {
-        setToastMessage(`${movie.title} removido da lista`);
-        return prev.filter(m => m.id !== movie.id);
+      if (existingUser) {
+        // Atualiza usuário existente
+        const updatedUser = { ...existingUser, lastLogin: now };
+        updatedList = prev.map(u => u.email === authData.email ? updatedUser : u);
+        setCurrentUser(updatedUser);
+        localStorage.setItem('montflix_current_session', JSON.stringify(updatedUser));
+      } else {
+        // Cria novo registro mestre
+        const newUser: UserRecord = {
+          id: crypto.randomUUID(),
+          email: authData.email,
+          name: name,
+          avatar: authData.avatar,
+          createdAt: now,
+          lastLogin: now
+        };
+        updatedList = [newUser, ...prev];
+        setCurrentUser(newUser);
+        localStorage.setItem('montflix_current_session', JSON.stringify(newUser));
       }
-      setToastMessage(`${movie.title} salvo na sua lista`);
-      return [movie, ...prev];
+
+      localStorage.setItem('MONTFLIX_CORE_DATABASE', JSON.stringify(updatedList));
+      return updatedList;
     });
+
+    setToastMessage(`Sessão iniciada como ${name}`);
   };
 
-  const handleLogin = (userData: { email: string; avatar: string | null }) => {
-    setUser(userData);
-    localStorage.setItem('montflix_user', JSON.stringify(userData));
-    setToastMessage(`Bem-vindo à MONTFLIX!`);
+  const exportUserData = () => {
+    const dataStr = "data:text/json;charset=utf-8," + encodeURIComponent(JSON.stringify(dbUsers, null, 2));
+    const downloadAnchorNode = document.createElement('a');
+    downloadAnchorNode.setAttribute("href", dataStr);
+    downloadAnchorNode.setAttribute("download", `montflix_users_backup_${new Date().getTime()}.json`);
+    document.body.appendChild(downloadAnchorNode);
+    downloadAnchorNode.click();
+    downloadAnchorNode.remove();
+    setToastMessage("Backup do banco de dados concluído!");
   };
 
   const filteredMovies = useMemo(() => {
@@ -67,14 +103,14 @@ const App: React.FC = () => {
     );
   }, [searchQuery]);
 
-  if (!user) return <AuthScreen onLogin={handleLogin} onStartPairing={() => {}} />;
+  if (!currentUser) return <AuthScreen onLogin={handleLogin} onStartPairing={() => {}} />;
 
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-[#00D1FF] selection:text-black">
       <Navbar 
         onSearchChange={setSearchQuery} 
         onOpenSettings={() => setIsSettingsOpen(true)}
-        userAvatar={user.avatar} 
+        userAvatar={currentUser.avatar} 
         currentLang={language}
         currentView={currentView} 
         onViewChange={setCurrentView}
@@ -85,43 +121,39 @@ const App: React.FC = () => {
           <div className="animate-in">
             <Hero movies={MOCK_MOVIES.slice(0, 5)} onWatchNow={setActiveMovie} currentLang={language} />
             <div className="relative z-20 -mt-24 space-y-16">
-              {myList.length > 0 && <MovieRow title="Minha Lista" movies={myList} onSelect={setActiveMovie} onToggleFavorite={toggleFavorite} isFavoriteList />}
-              <MovieRow title="Destaques Gratuitos" movies={MOCK_MOVIES} onSelect={setActiveMovie} onToggleFavorite={toggleFavorite} favorites={myList} />
-              <MovieRow title="Exclusivos MONTFLIX" movies={[...MOCK_MOVIES].reverse()} onSelect={setActiveMovie} onToggleFavorite={toggleFavorite} favorites={myList} />
+              {myList.length > 0 && <MovieRow title="Minha Lista" movies={myList} onSelect={setActiveMovie} onToggleFavorite={(m) => setMyList(prev => prev.filter(x => x.id !== m.id))} isFavoriteList />}
+              <MovieRow title="Destaques Gratuitos" movies={MOCK_MOVIES} onSelect={setActiveMovie} favorites={myList} />
+              <MovieRow title="Exclusivos" movies={[...MOCK_MOVIES].reverse()} onSelect={setActiveMovie} favorites={myList} />
             </div>
           </div>
         ) : (
           <div className="px-6 md:px-14 lg:px-24 pt-32 animate-in">
-            <h2 className="text-4xl font-black uppercase tracking-tighter mb-12 border-l-4 border-[#00D1FF] pl-6">
-              {searchQuery ? `Resultados` : currentView === 'tv' ? 'Séries' : 'Filmes'}
-            </h2>
+            <h2 className="text-4xl font-black uppercase tracking-tighter mb-12 border-l-4 border-[#00D1FF] pl-6">Resultados</h2>
             <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-6">
               {filteredMovies.map(m => (
-                <MovieCard key={m.id} movie={m} onSelect={setActiveMovie} onToggleFavorite={() => toggleFavorite(m)} isFavorite={!!myList.find(f => f.id === m.id)} />
+                <MovieCard key={m.id} movie={m} onSelect={setActiveMovie} onToggleFavorite={() => {}} isFavorite={false} />
               ))}
             </div>
           </div>
         )}
       </main>
 
-      <footer className="py-20 border-t border-white/5 text-center opacity-40 text-[10px] uppercase font-bold tracking-[0.3em]">
-        © 2026 MONTFLIX PRODUCTION • CINEMA GRATUITO
-      </footer>
-
       <SettingsModal 
         isOpen={isSettingsOpen} 
         onClose={() => setIsSettingsOpen(false)} 
-        user={user} 
-        onUpdateAvatar={(img) => setUser({...user, avatar: img})} 
-        onLogout={() => { localStorage.removeItem('montflix_user'); setUser(null); }} 
-        onShowToast={setToastMessage} 
+        user={currentUser} 
+        allUsers={dbUsers}
+        onExportData={exportUserData}
+        onLogout={() => { localStorage.removeItem('montflix_current_session'); setCurrentUser(null); }} 
+        onUpdateAvatar={(img) => {
+          const updated = {...currentUser, avatar: img};
+          setCurrentUser(updated);
+          localStorage.setItem('montflix_current_session', JSON.stringify(updated));
+        }}
         currentLang={language} 
         setLanguage={setLanguage} 
-        devices={[]} 
-        onAddDevice={() => {}} 
-        onRemoveDevice={() => {}} 
-        activePairingCode={null} 
-        onGeneratePairingCode={() => ""}
+        onShowToast={setToastMessage}
+        devices={[]} onAddDevice={() => {}} onRemoveDevice={() => {}} activePairingCode={null} onGeneratePairingCode={() => ""}
       />
       
       {activeMovie && <VideoPlayer movie={activeMovie} onClose={() => setActiveMovie(null)} />}
