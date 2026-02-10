@@ -7,6 +7,7 @@ import AuthScreen from './components/AuthScreen';
 import NotificationToast from './components/NotificationToast';
 import VideoPlayer from './components/VideoPlayer';
 import MovieCard from './components/MovieCard';
+import DatabaseView from './components/DatabaseView';
 import { Movie } from './services/types';
 import { Language } from './translations';
 import { MOCK_MOVIES } from './constants';
@@ -31,7 +32,6 @@ const App: React.FC = () => {
   const [currentView, setCurrentView] = useState('home');
   const [myList, setMyList] = useState<Movie[]>([]);
 
-  // Carregamento do Banco de Dados Central
   useEffect(() => {
     const savedSession = localStorage.getItem('montflix_current_session');
     const savedList = localStorage.getItem('montflix_mylist');
@@ -57,13 +57,11 @@ const App: React.FC = () => {
       let updatedList: UserRecord[];
 
       if (existingUser) {
-        // Atualiza usuário existente
         const updatedUser = { ...existingUser, lastLogin: now };
         updatedList = prev.map(u => u.email === authData.email ? updatedUser : u);
         setCurrentUser(updatedUser);
         localStorage.setItem('montflix_current_session', JSON.stringify(updatedUser));
       } else {
-        // Cria novo registro mestre
         const newUser: UserRecord = {
           id: crypto.randomUUID(),
           email: authData.email,
@@ -126,6 +124,8 @@ const App: React.FC = () => {
               <MovieRow title="Exclusivos" movies={[...MOCK_MOVIES].reverse()} onSelect={setActiveMovie} favorites={myList} />
             </div>
           </div>
+        ) : currentView === 'database' ? (
+          <DatabaseView users={dbUsers} onExport={exportUserData} currentUserEmail={currentUser.email} />
         ) : (
           <div className="px-6 md:px-14 lg:px-24 pt-32 animate-in">
             <h2 className="text-4xl font-black uppercase tracking-tighter mb-12 border-l-4 border-[#00D1FF] pl-6">Resultados</h2>
