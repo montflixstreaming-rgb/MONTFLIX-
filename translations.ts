@@ -1,3 +1,4 @@
+
 export const translations = {
   pt: {
     home: "Início",
@@ -9,6 +10,9 @@ export const translations = {
     watchNow: "ASSISTIR AGORA",
     moreInfo: "MAIS INFORMAÇÕES",
     settings: "Configurações",
+    watchTogether: "Assistir Comigo",
+    shareLink: "Link copiado! Envie para seus amigos.",
+    joiningParty: "Entrando na sessão compartilhada...",
     statusFree: "Conta Ativa",
     supportTitle: "Suporte e Curadoria",
     aiSupport: "Dicas do Alex",
@@ -57,6 +61,9 @@ export const translations = {
     watchNow: "WATCH NOW",
     moreInfo: "MORE INFO",
     settings: "Settings",
+    watchTogether: "Watch Together",
+    shareLink: "Link copied! Share with friends.",
+    joiningParty: "Joining shared session...",
     statusFree: "Active Account",
     supportTitle: "Support & Curation",
     aiSupport: "Alex's Tips",
