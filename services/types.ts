@@ -19,7 +19,15 @@ export interface Movie {
   mediaType?: 'movie' | 'tv';
   subtitles?: SubtitleTrack[];
   originalLanguage?: 'en' | 'pt';
-  imagePrompt?: string; // Prompt detalhado para o Gemini Image
+  imagePrompt?: string;
+}
+
+export interface IPTVChannel {
+  id: string;
+  name: string;
+  logo: string;
+  url: string;
+  group: string;
 }
 
 export interface ChatMessage {

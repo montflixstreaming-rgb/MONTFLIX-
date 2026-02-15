@@ -1,5 +1,6 @@
+
 import React from 'react';
-import { translations, Language } from '../translations';
+import { Language } from '../translations';
 
 interface NavbarProps {
   onSearchChange: (query: string) => void;
@@ -12,62 +13,73 @@ interface NavbarProps {
 }
 
 const Navbar: React.FC<NavbarProps> = ({ 
-  onSearchChange, onOpenSettings, userAvatar, currentLang, currentView, onViewChange
+  onOpenSettings, userAvatar, currentView, onViewChange
 }) => {
-  const t = translations[currentLang];
-  
-  const NavLink = ({ view, label }: { view: string, label: string }) => (
-    <button 
-      onClick={() => onViewChange(view)}
-      className={`transition-all duration-300 hover:text-white text-xs sm:text-sm 2xl:text-2xl font-black uppercase tracking-widest ${
-        currentView === view 
-          ? 'text-[#00D1FF] border-b-2 border-[#00D1FF] pb-1' 
-          : 'text-gray-500'
-      }`}
-    >
-      {label}
-    </button>
-  );
-
   return (
-    <nav className="fixed top-0 w-full z-[100] bg-gradient-to-b from-black via-black/80 to-transparent px-4 sm:px-10 md:px-14 2xl:px-24 py-4 sm:py-8 flex items-center justify-between transition-all duration-500 hover:bg-black">
-      <div className="flex items-center gap-6 sm:gap-12 md:gap-16">
-        <div 
-          onClick={() => onViewChange('home')}
-          className="text-2xl sm:text-3xl md:text-4xl 2xl:text-7xl font-black tracking-tighter cursor-pointer flex items-center gap-3 select-none"
-        >
-          <span className="bg-gradient-to-r from-white to-[#00D1FF] bg-clip-text text-transparent drop-shadow-[0_0_20px_rgba(0,209,255,0.3)]">MONTFLIX</span>
-        </div>
-        
-        <div className="hidden lg:flex gap-6 md:gap-10 2xl:gap-20">
-          <NavLink view="home" label={t.home} />
-          <NavLink view="movies" label={t.movies} />
-        </div>
+    <nav className="fixed top-0 w-full z-[100] bg-black/60 backdrop-blur-2xl border-b border-white/5 px-6 md:px-16 py-6 flex items-center justify-between">
+      {/* LOGO GIGANTE NEON - BRANCO E AZUL */}
+      <div 
+        onClick={() => onViewChange('home')}
+        className="cursor-pointer select-none group flex items-center gap-3"
+      >
+        <div className="w-2 h-12 bg-[#00D1FF] rounded-full shadow-[0_0_20px_#00D1FF] group-hover:shadow-[0_0_30px_#00D1FF] transition-all duration-500" />
+        <span className="text-5xl md:text-6xl font-black italic tracking-tighter text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.2)] transition-all">
+          MONT<span className="text-[#00D1FF] drop-shadow-[0_0_25px_rgba(0,209,255,0.9)]">FLIX</span>
+        </span>
       </div>
 
-      <div className="flex items-center gap-4 sm:gap-8 2xl:gap-16">
-        <div className="relative group flex items-center">
-          <button className="text-white hover:scale-110 transition-transform p-2 2xl:p-6">
-            <svg xmlns="http://www.w3.org/2000/svg" className="h-5 w-5 sm:h-6 sm:w-6 2xl:h-12 2xl:w-12" fill="none" viewBox="0 0 24 24" stroke="currentColor">
-              <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2.5} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
-            </svg>
-          </button>
-          <input
-            type="text"
-            placeholder={t.searchPlaceholder}
-            onChange={(e) => onSearchChange(e.target.value)}
-            className="absolute right-0 bg-black/95 border border-white/10 text-white rounded-full px-4 sm:px-12 py-2 text-xs sm:text-sm 2xl:text-2xl focus:outline-none transition-all w-0 group-focus-within:w-48 sm:group-focus-within:w-72 2xl:group-focus-within:w-[30rem] opacity-0 group-focus-within:opacity-100 placeholder:text-gray-600 backdrop-blur-3xl"
-          />
-        </div>
+      {/* NAVEGAÇÃO SLIM PROFISSIONAL - BOTÕES PEQUENOS */}
+      <div className="flex items-center gap-8 md:gap-14">
+        <button 
+          onClick={() => onViewChange('home')}
+          className="relative px-1 py-1 group outline-none"
+        >
+          <span className={`text-[9px] md:text-[11px] font-black uppercase tracking-[0.5em] transition-all duration-500 ${
+            currentView === 'home' || currentView === 'movies'
+              ? 'text-white' 
+              : 'text-white/20 hover:text-white/50'
+          }`}>
+            Filmes
+          </span>
+          {(currentView === 'home' || currentView === 'movies') && (
+            <div className="absolute -bottom-3 left-0 right-0 h-[2px] bg-[#00D1FF] shadow-[0_0_15px_#00D1FF] animate-in slide-in-from-left-2" />
+          )}
+        </button>
 
         <button 
+          onClick={() => onViewChange('iptv')}
+          className="relative px-1 py-1 group outline-none"
+        >
+          <span className={`text-[9px] md:text-[11px] font-black uppercase tracking-[0.5em] transition-all duration-500 ${
+            currentView === 'iptv' 
+              ? 'text-white' 
+              : 'text-white/20 hover:text-white/50'
+          }`}>
+            Ao Vivo
+          </span>
+          {currentView === 'iptv' && (
+            <div className="absolute -bottom-3 left-0 right-0 h-[2px] bg-red-600 shadow-[0_0_15px_red] animate-in slide-in-from-right-2" />
+          )}
+        </button>
+      </div>
+
+      {/* PERFIL DESIGNER */}
+      <div className="flex items-center gap-6">
+        <div className="hidden lg:flex flex-col items-end leading-none">
+            <span className="text-[9px] font-black text-[#00D1FF] uppercase tracking-[0.2em] mb-1">Status Pro</span>
+            <div className="flex items-center gap-1.5">
+              <div className="w-1.5 h-1.5 bg-green-500 rounded-full animate-pulse" />
+              <span className="text-[8px] text-white/30 font-bold uppercase tracking-widest">Servidor Online</span>
+            </div>
+        </div>
+        <button 
           onClick={onOpenSettings}
-          className="relative w-8 h-8 sm:w-12 sm:h-12 2xl:w-24 2xl:h-24 rounded-lg sm:rounded-2xl overflow-hidden flex items-center justify-center transition-all ring-2 ring-white/10 hover:ring-[#00D1FF]/50 active:scale-90"
+          className="w-12 h-12 rounded-2xl overflow-hidden border border-white/10 hover:border-[#00D1FF]/50 transition-all active:scale-95 bg-zinc-900 group shadow-2xl"
         >
           {userAvatar ? (
-            <img src={userAvatar} alt="Avatar" className="w-full h-full object-cover" />
+            <img src={userAvatar} className="w-full h-full object-cover opacity-80 group-hover:opacity-100 group-hover:scale-110 transition-all duration-500" alt="User" />
           ) : (
-            <div className="w-full h-full flex items-center justify-center bg-zinc-800 text-[10px] 2xl:text-2xl font-bold">👤</div>
+            <div className="w-full h-full flex items-center justify-center text-xl">👤</div>
           )}
         </button>
       </div>

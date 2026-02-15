@@ -1,5 +1,7 @@
+
 import React, { useState, useRef, useEffect } from 'react';
 import { sendVerificationEmail } from '../services/emailService';
+import { Security } from '../services/security';
 
 interface AuthScreenProps {
   onLogin: (user: { email: string; avatar: string | null }) => void;
@@ -15,7 +17,6 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
   const [generatedCode, setGeneratedCode] = useState('');
   const [verificationCode, setVerificationCode] = useState(['', '', '', '', '', '']);
   const [resendTimer, setResendTimer] = useState(0);
-  const [systemStatus, setSystemStatus] = useState('Código enviado com sucesso.');
   
   const inputRefs = useRef<(HTMLInputElement | null)[]>([]);
 
@@ -37,18 +38,18 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
     e.preventDefault();
     if (email && password) {
       setIsLoading(true);
-      
+      const safeEmail = Security.sanitize(email);
+
       if (isRegistering) {
         const newCode = generateNewCode();
         setGeneratedCode(newCode);
-        const sent = await sendVerificationEmail(email, newCode);
+        const sent = await sendVerificationEmail(safeEmail, newCode);
         setIsLoading(false);
         if (sent) {
           setShowVerification(true);
           setResendTimer(60);
-          setSystemStatus(`Código enviado para ${email}`);
         } else {
-          alert("Erro ao enviar código.");
+          alert("Falha ao enviar código. Verifique sua conexão.");
         }
       } else {
         setTimeout(() => {
@@ -62,20 +63,21 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
   const handleResend = async () => {
     if (resendTimer > 0) return;
     setIsLoading(true);
+    const safeEmail = Security.sanitize(email);
     const newCode = generateNewCode();
     setGeneratedCode(newCode);
-    await sendVerificationEmail(email, newCode);
+    await sendVerificationEmail(safeEmail, newCode);
     setIsLoading(false);
     setResendTimer(60);
     setVerificationCode(['', '', '', '', '', '']);
     inputRefs.current[0]?.focus();
-    setSystemStatus("Novo código enviado.");
   };
 
   const completeLogin = () => {
+    const safeEmail = Security.sanitize(email);
     const userData = { 
-      email, 
-      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${email.split('@')[0]}`,
+      email: safeEmail, 
+      avatar: `https://api.dicebear.com/7.x/avataaars/svg?seed=${safeEmail.split('@')[0]}`,
     };
     onLogin(userData);
   };
@@ -100,9 +102,9 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
   const handleVerify = () => {
     if (verificationCode.join('') === generatedCode) {
       setIsLoading(true);
-      setTimeout(completeLogin, 1000);
+      setTimeout(completeLogin, 800);
     } else {
-      setSystemStatus("Código inválido.");
+      alert("Código incorreto.");
       setVerificationCode(['', '', '', '', '', '']);
       inputRefs.current[0]?.focus();
     }
@@ -112,40 +114,80 @@ const AuthScreen: React.FC<AuthScreenProps> = ({ onLogin }) => {
     <div className="relative min-h-screen w-full flex flex-col items-center justify-center bg-black font-sans overflow-hidden">
       <div className="absolute inset-0 z-0">
         <div 
-          className="w-full h-full bg-cover bg-center opacity-25 scale-105"
-          style={{ backgroundImage: 'url("https://assets.nflxext.com/ffe/siteui/vlv3/f841d4c7-10e1-40af-bca1-0746f3a15291/89914619-f5-4428-b2ca-1087859e2183/BR-pt-20241106-TRIFECTA-perspective_2c021c1a-2831-4824-9f7a-853112a9c339_large.jpg")' }}
+          className="w-full h-full bg-cover bg-center opacity-20 scale-105"
+          style={{ backgroundImage: 'url("https://images.unsplash.com/photo-1574267432553-4b4628081c31?q=80&w=2073&auto=format&fit=crop")' }}
         />
-        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/90 to-black" />
+        <div className="absolute inset-0 bg-gradient-to-t from-black via-black/80 to-black" />
       </div>
 
-      <div className="relative z-10 w-full max-w-[500px] px-8 py-16 bg-black/40 rounded-[3rem] backdrop-blur-3xl border border-white/10 shadow-2xl">
+      <div className="relative z-10 w-full max-w-[450px] px-8 py-16 bg-black/40 rounded-[3rem] backdrop-blur-3xl border border-white/10 shadow-2xl">
         {!showVerification ? (
           <div className="animate-in fade-in slide-in-from-bottom-4">
-            <h1 className="text-3xl font-black text-white tracking-tighter mb-8">{isRegistering ? 'Criar Conta' : 'Acessar'}</h1>
+            <h1 className="text-4xl font-black text-[#00D1FF] tracking-tighter mb-10 text-center">MONTFLIX</h1>
+            
             <form onSubmit={handleSubmit} className="space-y-6">
-              <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} placeholder="E-mail" className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-[#00D1FF]" />
-              <input type="password" required value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Senha" className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-[#00D1FF]" />
-              <button type="submit" disabled={isLoading} className="w-full bg-[#00D1FF] text-black font-black py-5 rounded-2xl uppercase text-xs tracking-widest">{isLoading ? '...' : 'Entrar'}</button>
+              <input 
+                type="email" 
+                required 
+                value={email} 
+                onChange={(e) => setEmail(e.target.value)} 
+                placeholder="E-mail" 
+                className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-[#00D1FF] transition-all" 
+              />
+              <input 
+                type="password" 
+                required 
+                value={password} 
+                onChange={(e) => setPassword(e.target.value)} 
+                placeholder="Senha" 
+                className="w-full px-6 py-4 bg-white/5 border border-white/10 rounded-2xl text-white focus:outline-none focus:border-[#00D1FF] transition-all" 
+              />
+              <button 
+                type="submit" 
+                disabled={isLoading} 
+                className="w-full bg-[#00D1FF] text-black font-black py-5 rounded-2xl uppercase text-xs tracking-[0.3em] shadow-lg hover:scale-[1.02] active:scale-95 transition-all"
+              >
+                {isLoading ? 'Carregando...' : (isRegistering ? 'Criar Conta' : 'Entrar')}
+              </button>
             </form>
-            <button onClick={() => setIsRegistering(!isRegistering)} className="w-full mt-8 text-gray-500 text-xs font-black uppercase tracking-widest">{isRegistering ? 'Voltar para login' : 'Novo por aqui? Criar conta'}</button>
+            <button 
+              onClick={() => setIsRegistering(!isRegistering)} 
+              className="w-full mt-8 text-gray-500 text-[10px] font-black uppercase tracking-widest hover:text-white transition-colors"
+            >
+              {isRegistering ? 'Já tenho conta' : 'Novo por aqui? Criar conta'}
+            </button>
           </div>
         ) : (
           <div className="animate-in fade-in zoom-in-95 text-center">
-             <div className="mb-10 inline-flex items-center gap-4 bg-white/5 p-4 rounded-3xl border border-white/10">
-                <div className="w-12 h-12 bg-zinc-800 rounded-2xl flex items-center justify-center text-2xl">🔐</div>
-                <div className="text-left">
-                  <p className="text-[10px] font-black text-gray-400 uppercase tracking-widest">Segurança MONTFLIX</p>
-                  <p className="text-[11px] text-gray-300 font-bold">{systemStatus}</p>
-                </div>
-             </div>
-             <h2 className="text-3xl font-black text-white mb-10 tracking-tighter">Verificação</h2>
+             <h2 className="text-2xl font-black text-white mb-2 tracking-tighter uppercase">Verificação</h2>
+             <p className="text-[10px] text-gray-500 font-bold uppercase tracking-widest mb-10">Enviamos um código para seu e-mail</p>
              <div className="flex justify-between gap-2 mb-10">
                 {verificationCode.map((digit, idx) => (
-                  <input key={idx} ref={(el) => { inputRefs.current[idx] = el; }} type="text" value={digit} onChange={(e) => handleCodeChange(idx, e.target.value)} onKeyDown={(e) => handleKeyDown(idx, e)} className="w-12 h-16 bg-white/5 border border-white/10 rounded-2xl text-center text-2xl font-black text-[#00D1FF] focus:outline-none focus:border-[#00D1FF]" />
+                  <input 
+                    key={idx} 
+                    ref={(el) => { inputRefs.current[idx] = el; }} 
+                    type="text" 
+                    value={digit} 
+                    onChange={(e) => handleCodeChange(idx, e.target.value)} 
+                    onKeyDown={(e) => handleKeyDown(idx, e)} 
+                    className="w-12 h-16 bg-white/5 border border-white/10 rounded-2xl text-center text-2xl font-black text-[#00D1FF] focus:outline-none focus:border-[#00D1FF] shadow-inner" 
+                  />
                 ))}
              </div>
-             <button onClick={handleVerify} disabled={isLoading} className="w-full bg-white text-black font-black py-5 rounded-2xl uppercase text-xs tracking-widest">Validar</button>
-             <button onClick={handleResend} disabled={resendTimer > 0} className="mt-8 text-gray-500 text-[10px] uppercase font-black tracking-widest">{resendTimer > 0 ? `Reenviar em ${resendTimer}s` : 'Reenviar código'}</button>
+             <button 
+              onClick={handleVerify} 
+              disabled={isLoading} 
+              className="w-full bg-white text-black font-black py-5 rounded-2xl uppercase text-xs tracking-[0.4em] transition-all"
+             >
+              Verificar Código
+             </button>
+             <button 
+              onClick={handleResend} 
+              disabled={resendTimer > 0} 
+              className="mt-8 text-gray-500 text-[10px] uppercase font-black tracking-widest hover:text-white"
+             >
+              {resendTimer > 0 ? `Reenviar em ${resendTimer}s` : 'Reenviar código'}
+             </button>
           </div>
         )}
       </div>

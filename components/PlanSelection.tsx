@@ -43,15 +43,15 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onSelectPlan, userEmail, 
           <div className="space-y-4 max-w-2xl">
             <div className="flex items-start gap-4">
               <span className="text-[#E50914] text-2xl mt-1">✓</span>
-              <p className="text-lg text-gray-700 font-medium">Acesso ilimitado a todos os filmes e séries do catálogo.</p>
+              <p className="text-lg text-gray-700 font-medium">Acesso ilimitado a todos os filmes e séries do catálogo (TMDB).</p>
             </div>
             <div className="flex items-start gap-4">
               <span className="text-[#E50914] text-2xl mt-1">✓</span>
-              <p className="text-lg text-gray-700 font-medium">Sem anúncios ou interrupções em nenhum momento.</p>
+              <p className="text-lg text-gray-700 font-medium">Integração com 8 servidores de alta velocidade simultâneos.</p>
             </div>
             <div className="flex items-start gap-4">
               <span className="text-[#E50914] text-2xl mt-1">✓</span>
-              <p className="text-lg text-gray-700 font-medium">Experiência imersiva com 4K HDR e Áudio Espacial.</p>
+              <p className="text-lg text-gray-700 font-medium">Experiência imersiva sem interrupções em até 4K HDR.</p>
             </div>
           </div>
         </div>
@@ -100,7 +100,7 @@ const PlanSelection: React.FC<PlanSelectionProps> = ({ onSelectPlan, userEmail, 
         </button>
 
         <p className="text-center text-gray-400 text-xs mt-10 max-w-lg mx-auto leading-relaxed">
-          Ao clicar em próximo, você terá acesso às opções de pagamento via PIX ou Cartão de Crédito. Seus dados são processados de forma criptografada e segura.
+          Assinatura processada via ambiente seguro. O acesso é liberado instantaneamente após a confirmação.
         </p>
       </div>
 
